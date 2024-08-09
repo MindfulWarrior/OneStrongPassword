@@ -240,7 +240,7 @@ namespace OneStrongPassword.API.Standard
         private static extern uint OSPMinLength();
 
         internal static uint MinLength() => OSPMinLength();
-#endregion
+        #endregion
 
         #region MaxLength
         [DllImport("ospapi.dll")]

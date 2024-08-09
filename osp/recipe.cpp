@@ -5,7 +5,7 @@ using namespace std;
 
 bool Recipe::HasChar(char ch) const
 {
-	if (ch == 0)
+	if (ch <= 0 || ch > 127)
 		return false;
 
 	char position = ch - ' '; // ignore non-printable
@@ -14,7 +14,7 @@ bool Recipe::HasChar(char ch) const
 
 	short block = position / 32;
 	position -= block * 32;
-	return charSet[block] & 1 << position;
+	return charSet[block] & (0x01 << position);
 }
 
 bool Recipe::Verified(const char* password, size_t length) const
@@ -105,20 +105,26 @@ void Recipe::Reset(const OSPRecipe & recipe)
 
 void Recipe::setCharBitOn(char ch)
 {
+	if (ch <= 0 || ch > 126)
+		return;
+
 	char position = ch - ' '; // ignore non-printable
 	if (position < 0)
 		return;
 	short block = position / 32;
 	position -= block * 32;
-	charSet[block] |= 1 << position;
+	charSet[block] |= (0x01 << position);
 }
 
 void Recipe::setCharBitOff(char ch)
 {
+	if (ch <= 0 || ch > 126)
+		return;
+
 	char position = ch - ' '; // ignore non-printable
 	if (position < 0)
 		return;
 	short block = position / 32;
 	position -= block * 32;
-	charSet[block] &= ~(1 << position);
+	charSet[block] &= ~(0x01 << position);
 }

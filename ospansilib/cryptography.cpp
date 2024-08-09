@@ -24,6 +24,7 @@ Software.
 #include "hashfactory.h"
 
 #include <random>
+#include <stdexcept>
 
 using namespace OneStrongPassword;
 using namespace std;
