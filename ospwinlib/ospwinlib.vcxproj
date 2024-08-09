@@ -20,7 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="cryptography.cpp" />
+    <ClCompile Include="hashfactory.cpp" />
     <ClCompile Include="os.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="hashfactory.h" />
+    <ClInclude Include="ospwin.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

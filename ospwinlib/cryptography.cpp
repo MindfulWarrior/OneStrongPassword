@@ -21,27 +21,27 @@ Software.
 */
 
 #include <windows.h>
+#include "ospwin.h"
 #include "cryptography.h"
+#include "hashfactory.h"
 
-#include <stdio.h>
 #include <safeint.h>
-
-#include "..\osp\bytevector.h"
-#include "..\osp\hashvector.h"
 
 using namespace msl::utilities;
 using namespace OneStrongPassword;
 
 #pragma region OS Specific Functions
 
-typedef struct StateHandle
+struct StateHandle
 {
+	StateHandle() : Hash() { }
+
 	mutable BCRYPT_ALG_HANDLE Encrypt = NULL;
-	mutable BCRYPT_ALG_HANDLE Hash = NULL;
 	mutable size_t BlockSize = 0;
 	mutable size_t KeySize = 0;
-	mutable size_t HashSize = 0;
-} OSPState;
+
+	mutable HashFactory Hash;
+};
 
 bool checkStatus(NTSTATUS status, OSPError* error)
 {
@@ -78,21 +78,6 @@ BCRYPT_ALG_HANDLE EncryptAlgorithm(const StateHandle* state, OSPError* error)
 		return state->Encrypt;
 	}
 	
-	OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_NOT_INITIALIZED);
-	return NULL;
-}
-
-BCRYPT_ALG_HANDLE HashAlgorithm(const StateHandle* state, OSPError* error)
-{
-	if (state)
-	{
-		if (!state->Hash)
-			checkStatus(BCryptOpenAlgorithmProvider(
-				&(state->Hash), BCRYPT_SHA512_ALGORITHM, NULL, BCRYPT_HASH_REUSABLE_FLAG
-			), error);
-		return state->Hash;
-	}
-
 	OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_NOT_INITIALIZED);
 	return NULL;
 }
@@ -169,52 +154,6 @@ size_t EncryptSize(BCRYPT_KEY_HANDLE hkey, size_t data_size, size_t size, OSPErr
 	return 0;
 }
 
-bool BeginHashing(Cryptography& cryptography, BCRYPT_HASH_HANDLE& hhash, PUCHAR& hashobj, ULONG flags, OSPError* error)
-{
-	ULONG result;
-	unsigned int osize = 0;
-
-	BEGIN_MEMORY_CHECK(cryptography.AvailableMemory());
-
-	BCRYPT_ALG_HANDLE halg = HashAlgorithm(static_cast<StateHandle*>(cryptography.State()), error);
-
-	bool success = checkStatus(BCryptGetProperty(halg, BCRYPT_OBJECT_LENGTH, (PUCHAR)&osize, sizeof(osize), &result, 0), error);
-	if (success)
-	{
-		hashobj = new UCHAR[osize];
-		if (hashobj)
-			success = checkStatus(
-				BCryptCreateHash(halg, &hhash, hashobj, osize, NULL, 0, flags), error
-			);
-	}
-
-	if (!success && hashobj)
-		cryptography.Destroy(hashobj, osize, error);
-
-	END_MEMORY_CHECK(cryptography.AvailableMemory());
-
-	return success;
-}
-
-bool DoHashing(
-	const OS& os, BCRYPT_HASH_HANDLE hhash, const byte* const data, size_t dsize, byte* const hash, size_t hsize, OSPError* error
-) {
-	bool success = false;
-	os.Zero(hash, hsize);
-	if (success = checkStatus(BCryptHashData(hhash, (PUCHAR)data, SafeInt<ULONG>(dsize), 0), error))
-		success = checkStatus(BCryptFinishHash(hhash, hash, SafeInt<ULONG>(hsize), 0), error);
-	return success;
-}
-
-bool EndHashing(BCRYPT_HASH_HANDLE& hhash, OSPError* error)
-{
-	bool success = true;
-	if (hhash)
-		success = checkStatus(BCryptDestroyHash(hhash), error);
-	hhash = 0;
-	return success;
-}
-
 #pragma endregion
 
 #pragma region Public Constructors, OS and ICryptography Overrides
@@ -259,22 +198,16 @@ bool Cryptography::Destroy(OSPError* error)
 {
 	bool success = OS::Destroy(error);
 
-	StateHandle* state = (StateHandle*)(State(error));
-	if (state)
-	{
-		if (state->Encrypt)
-		{
+	auto state = static_cast<StateHandle*>(State(error));
+	if (state) {
+		if (state->Encrypt) {
 			success = checkStatus(BCryptCloseAlgorithmProvider(state->Encrypt, 0), error) && success;
 			state->Encrypt = 0;
 		}
 
-		if (state->Hash)
-		{
-			success = checkStatus(BCryptCloseAlgorithmProvider(state->Hash, 0), error) && success;
-			state->Hash = 0;
-		}
+		success = state->Hash.Destroy(error) && success;
 
-		delete _state;
+		delete state;
 		_state = nullptr;
 	}
 
@@ -288,14 +221,14 @@ bool Cryptography::Destroy(OSPError* error)
 void* Cryptography::State(OSPError* error)
 {
 	if (!_state)
-		_state = new StateHandle;
+		_state = new StateHandle();
 	return _state;
 }
 
 const void* Cryptography::State(OSPError* error) const
 {
 	if (!_state)
-		_state = new StateHandle;
+		_state = new StateHandle();
 	return _state;
 }
 
@@ -308,7 +241,7 @@ size_t Cryptography::EncryptSize(const Cipher& cipher, size_t size, OSPError* er
 	if (!cipher.Prepared() && !cipher.Completed())
 		return OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_CIPHER_NOT_IN_THE_RIGHT_STATE);
 
-	StateHandle* state = static_cast<StateHandle*>(State());
+	auto state = static_cast<StateHandle*>(State());
 	BCRYPT_ALG_HANDLE halg = EncryptAlgorithm(state, error);
 	BCRYPT_KEY_HANDLE hkey = cipher.Handle();
 	PBYTE keyobj = NULL;
@@ -335,7 +268,7 @@ bool Cryptography::Encrypt(
 	if (!cipher.Prepared() && !cipher.Completed())
 		return OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_CIPHER_NOT_IN_THE_RIGHT_STATE);
 
-	StateHandle* state = static_cast<StateHandle*>(State());
+	auto state = static_cast<StateHandle*>(State());
 	BCRYPT_KEY_HANDLE hkey = cipher.Handle();
 	PBYTE keyobj = NULL;
 	if (!hkey && !RetreiveKey(state, cipher, hkey, keyobj, error))
@@ -425,7 +358,7 @@ bool Cryptography::Decrypt(
 	if (!cipher.Prepared() && !cipher.Completed())
 		return OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_CIPHER_NOT_IN_THE_RIGHT_STATE);
 
-	StateHandle* state = static_cast<StateHandle*>(State());
+	auto state = static_cast<StateHandle*>(State());
 	BCRYPT_KEY_HANDLE hkey = cipher.Handle();
 	PBYTE keyobj = NULL;
 	if (!hkey && !RetreiveKey(state, cipher, hkey, keyobj, error))
@@ -468,28 +401,30 @@ bool Cryptography::Hash(const ByteVector& data, ByteVector& hash, OSPError* erro
 
 	bool success = false;
 
+	auto state = static_cast<const StateHandle*>(State(error));
+	const auto& factory = state->Hash;
+
 	BEGIN_MEMORY_CHECK(AvailableMemory());
 
-	BCRYPT_HASH_HANDLE hhash = 0;
-	PUCHAR hashobj = 0;
+	HashFactory::Hash hfhash;
 
-	if (success = BeginHashing(*this, hhash, hashobj, BCRYPT_HASH_REUSABLE_FLAG, error))
+	if (success = factory.Start(hfhash, BCRYPT_HASH_REUSABLE_FLAG, error))
 	{
 		const byte* dpart = data;
 		byte* hpart = hash;
 
-		size_t hashsize = HashSize();
+		size_t hashsize = HashSize(error);
 		size_t datasize = data.Size();
 
 		size_t count = hash.Size() / hashsize;
 
 		for (size_t n = 0; success && n < count; n++)
 		{
-			if (success = DoHashing(*this, hhash, dpart, datasize, hpart, hashsize, error))
+			if (success = factory.Update(hfhash, dpart, datasize, hpart, error))
 			{
 				dpart = hpart;
-				datasize = hashsize;
-				hpart += hashsize;
+				datasize = factory.Size();
+				hpart += factory.Size();
 			}
 		}
 
@@ -499,7 +434,7 @@ bool Cryptography::Hash(const ByteVector& data, ByteVector& hash, OSPError* erro
 			HashVector tmp(*this);
 			if (tmp.Initialize())
 			{
-				success = DoHashing(*this, hhash, dpart, datasize, tmp, hashsize, error);
+				success = factory.Update(hfhash, dpart, datasize, tmp, error);
 				if (success)
 					tmp.CopyTo(hpart, remaining, error);
 				tmp.Destroy();
@@ -507,7 +442,7 @@ bool Cryptography::Hash(const ByteVector& data, ByteVector& hash, OSPError* erro
 		}
 	}
 
-	success = EndHashing(hhash, error) && success;
+	success = factory.Finish(hfhash, error) && success;
 
 	END_MEMORY_CHECK(AvailableMemory());
 	return success;
@@ -515,11 +450,9 @@ bool Cryptography::Hash(const ByteVector& data, ByteVector& hash, OSPError* erro
 
 size_t Cryptography::BlockSize(OSPError* error) const
 {
-	const StateHandle* state = static_cast<const StateHandle*>(State());
-	if (state)
-	{
-		if (!state->BlockSize)
-		{
+	auto state = static_cast<const StateHandle*>(State());
+	if (state) {
+		if (!state->BlockSize) {
 			ULONG result;
 			checkStatus(BCryptGetProperty(
 				EncryptAlgorithm(state, error), BCRYPT_BLOCK_LENGTH, (PUCHAR)&(state->BlockSize), sizeof(state->BlockSize), &result, 0
@@ -534,18 +467,9 @@ size_t Cryptography::BlockSize(OSPError* error) const
 
 size_t Cryptography::HashSize(OSPError* error) const
 {
-	const StateHandle* state = static_cast<const StateHandle*>(State());
+	auto state = static_cast<const StateHandle*>(State(error));
 	if (state)
-	{
-		if (!state->HashSize)
-		{
-			ULONG result;
-			checkStatus(BCryptGetProperty(
-				HashAlgorithm(state, error), BCRYPT_HASH_LENGTH, (PUCHAR)&(state->HashSize), sizeof(state->HashSize), &result, 0
-			), error);
-		}
-		return state->HashSize;
-	}
+		return state->Hash.Size(error);
 
 	OS::SetOSPError(error, OSP_API_Error, OSP_ERROR_NOT_INITIALIZED);
 	return NULL;
@@ -564,7 +488,7 @@ bool Cryptography::PrepareCipher(const ByteVector& secret, Cipher& cipher, OSPEr
 
 	cipher.Size() = 0;
 
-	const StateHandle* state = static_cast<const StateHandle*>(State());
+	auto state = static_cast<const StateHandle*>(State());
 	BCRYPT_ALG_HANDLE halg = EncryptAlgorithm(state, error);
 
 	if (!checkStatus(BCryptSetProperty(

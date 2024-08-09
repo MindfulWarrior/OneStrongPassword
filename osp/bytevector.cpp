@@ -71,7 +71,7 @@ bool ByteVector::CopyFrom(const byte * const src, size_t sz, size_t pos, OSPErro
 	return true;
 }
 
-bool ByteVector::CopyFrom(const ByteVector & v, OSPError* error)
+bool ByteVector::CopyFrom(const ByteVector& v, OSPError* error)
 {
 	return CopyFrom(v.bytes, v.Size(), 0, error);
 }

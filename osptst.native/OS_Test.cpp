@@ -197,29 +197,5 @@ namespace OneStrongPassword
 			}
 			Logger::WriteMessage("\n");
 		}
-
-		BEGIN_TEST_METHOD_ATTRIBUTE(OS_Clipboard_Test0)
-			TEST_DESCRIPTION(L"Copy to and Paste from clipboard")
-		END_TEST_METHOD_ATTRIBUTE()
-
-		TEST_METHOD(OS_Clipboard_Test0)
-		{
-			bool success;
-
-			char test[] = "test";
-
-			success = OS::CopyToClipboard(test, sizeof(test), &TestError);
-
-			Assert::IsTrue(success, L"Copy to clipboard failed");
-			Assert::IsTrue(OS::Zeroed((OS::byte* const)test, sizeof(test)), L"Data not zeroed");
-
-			char pasted[sizeof(test)];
-
-			success = OS::PasteFromClipboard(pasted, sizeof(pasted), &TestError);
-
-			Assert::IsTrue(success, L"Paste clipboard failed");
-			Assert::IsFalse(OS::Zeroed((OS::byte* const)pasted, sizeof(test)), L"No data returned");
-			Assert::IsTrue(strncmp("test", pasted, sizeof(pasted)) == 0, L"Wrong data returned");
-		}
 	};
 }

@@ -21,10 +21,9 @@ namespace OneStrongPassword.Console.Standard
 
             try
             {
-                Result result;
                 bool done;
 
-                using (var manager = PasswordManager.Open(1, PasswordManager.MinLength, out result))
+                using (var manager = PasswordManager.Open(1, PasswordManager.MinLength, out Result result))
                 using (var strongPassword = manager.StrongPassword(StrongName, out result))
                 {
                     if (manager == null || strongPassword == null)

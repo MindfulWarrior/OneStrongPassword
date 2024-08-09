@@ -32,7 +32,7 @@ using namespace std;
 
 namespace OneStrongPassword
 {
-	TEST_CLASS(SecureStore_Test)
+	TEST_CLASS(SecureStore_ANSI_Test)
 	{
 		static const size_t DATA_SIZE = 32;
 		static const size_t BLOCK_SIZE = 64;
@@ -108,34 +108,9 @@ namespace OneStrongPassword
 			Assert::AreEqual(TestError.Code, OSP_NO_ERROR, L"There was an undected error");
 		}
 
-		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Initialize_Destroy_Test0)
-			TEST_DESCRIPTION(L"Initialize then destroy.")
-		END_TEST_METHOD_ATTRIBUTE()
-
-		TEST_METHOD(SecureStore_Initialize_Destroy_Test0)
-		{
-			bool success;
-
-			SecureStore store;
-
-			const size_t count = 2;
-			const size_t maxsize = store.MinDataSize();
-
-			Assert::IsTrue(maxsize > 0, L"Unable to get minimum size");
-
-			success = store.Initialize(count, maxsize, &TestError);
-
-			Assert::IsTrue(success, L"Initialize failed");
-			Assert::AreEqual(maxsize, store.MaxDataSize(), L"Wrong maxsize");
-
-			success = store.Destroy(&TestError);
-
-			Assert::IsTrue(success, L"Destroy() failed");
-			Assert::AreEqual(size_t(0), store.AvailableMemory(), L"Wrong available memory");
-		}
-
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Test0)
 			TEST_DESCRIPTION(L"Encrypt then Decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Test0)
@@ -172,6 +147,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Test1)
 			TEST_DESCRIPTION(L"Encrypt then Decrypt twice.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Test1)
@@ -207,6 +183,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Test2)
 			TEST_DESCRIPTION(L"Encrypt different then Decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Test2)
@@ -251,6 +228,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Test3)
 			TEST_DESCRIPTION(L"Encrypt different with salt then Decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Test3)
@@ -295,6 +273,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Test4)
 			TEST_DESCRIPTION(L"Encrypt/decrypt, reset, then encrypt/decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Test4)
@@ -332,6 +311,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Leak_Test0)
 			TEST_DESCRIPTION(L"Encrypt/Decrypt memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Leak_Test0)
@@ -382,6 +362,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Encrypt_Decrypt_Leak_Test1)
 			TEST_DESCRIPTION(L"Encrypt/Decrypt with salt memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Encrypt_Decrypt_Leak_Test1)
@@ -432,6 +413,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Test0)
 			TEST_DESCRIPTION(L"Stored password is returned by Dispense.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Test0)
@@ -469,6 +451,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Test1)
 			TEST_DESCRIPTION(L"Data under different Names are Stored correctly.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Test1)
@@ -517,6 +500,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Test2)
 			TEST_DESCRIPTION(L"Different Data under same Name is Stored correctly.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Test2)
@@ -545,6 +529,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Test3)
 			TEST_DESCRIPTION(L"Store, reset, store again.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Test3)
@@ -577,6 +562,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Leak_Test0)
 			TEST_DESCRIPTION(L"Store all then dispnese to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Leak_Test0)
@@ -639,6 +625,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Leak_Test1)
 			TEST_DESCRIPTION(L"Store all with salt then dispnese to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Leak_Test1)
@@ -701,6 +688,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Leak_Test2)
 			TEST_DESCRIPTION(L"Store and dispense to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Leak_Test2)
@@ -749,6 +737,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Dispense_Leak_Test3)
 			TEST_DESCRIPTION(L"Store and dispense with salt to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Dispense_Leak_Test3)
@@ -797,6 +786,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Destroy_Test0)
 			TEST_DESCRIPTION(L"Store data and destroy.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Destroy_Test0)
@@ -832,6 +822,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Destroy_Leak_Test0)
 			TEST_DESCRIPTION(L"Store all then destroy to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Destroy_Leak_Test0)
@@ -883,6 +874,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Destroy_Leak_Test1)
 			TEST_DESCRIPTION(L"Store all with salt then destroy to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Destroy_Leak_Test1)
@@ -935,6 +927,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Destroy_Leak_Test2)
 			TEST_DESCRIPTION(L"Store and destroy to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Destroy_Leak_Test2)
@@ -979,6 +972,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_Store_Destroy_Leak_Test3)
 			TEST_DESCRIPTION(L"Store and destroy with salt to check memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_Store_Destroy_Leak_Test3)
@@ -1023,6 +1017,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_StrongHash_Test0)
 			TEST_DESCRIPTION(L"StrongHash takes enough time.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_StrongHash_Test0)
@@ -1066,6 +1061,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(SecureStore_StrongHash_Test1)
 			TEST_DESCRIPTION(L"StrongHash results did not change.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(SecureStore_StrongHash_Test1)

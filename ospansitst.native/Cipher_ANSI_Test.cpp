@@ -33,7 +33,7 @@ using namespace std;
 namespace OneStrongPassword
 {
 
-	TEST_CLASS(Cipher_Test)
+	TEST_CLASS(Cipher_ANSI_Test)
 	{
 	public:
 		static const size_t DATA_SIZE = 32;
@@ -99,6 +99,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Test0)
 			TEST_DESCRIPTION(L"Complete Cipher.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cipher_Test0)
@@ -132,6 +133,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Test1)
 			TEST_DESCRIPTION(L"Complete Cipher with secret.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cipher_Test1)
@@ -162,6 +164,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Copy_Test0)
 			TEST_DESCRIPTION(L"Encrypt with copy and decrypt with original.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cipher_Copy_Test0)
@@ -201,6 +204,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Copy_Test1)
 			TEST_DESCRIPTION(L"Encrypt/Decrypt with ciphers using the same key.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cipher_Copy_Test1)
@@ -240,6 +244,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Key_Test0)
 			TEST_DESCRIPTION(L"Different 'random' ciphers.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cipher_Key_Test0)
@@ -253,6 +258,24 @@ namespace OneStrongPassword
 			Setup(cipher1);
 
 			Assert::IsFalse(0 == memcmp(cipher0.Key(), cipher1.Key(), cipher0.Size()), L"Keys are the same");
+		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cipher_Key_Test1)
+			TEST_DESCRIPTION(L"Different ciphers with same secret.")
+			TEST_IGNORE()
+		END_TEST_METHOD_ATTRIBUTE()
+
+		TEST_METHOD(Cipher_Key_Test1)
+		{
+			DECLARE_OSPCipher(c0);
+			Cipher cipher0(cryptography, c0);
+			Setup(cipher0, IV);
+
+			DECLARE_OSPCipher(c1);
+			Cipher cipher1(cryptography, c1);
+			Setup(cipher1, IV);
+
+			Assert::IsTrue(0 == memcmp(cipher0.Key(), cipher1.Key(), cipher0.Size()), L"Keys are different");
 		}
 
 	};

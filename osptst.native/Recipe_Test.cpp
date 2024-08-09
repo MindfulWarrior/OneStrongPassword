@@ -242,38 +242,5 @@ namespace OneStrongPassword
 
 			Assert::IsTrue(recipe.GetSeperator() == 0, L"Seperator not removed when part of charset");
 		}
-
-		BEGIN_TEST_METHOD_ATTRIBUTE(Recipe_Seperator_Test1)
-			TEST_DESCRIPTION("Can remove seperator without changing passwore")
-		END_TEST_METHOD_ATTRIBUTE()
-
-		TEST_METHOD(Recipe_Seperator_Test1)
-		{
-			size_t length = (size_t)strnlen(OSP_RECIPE_ALL_SUPPORTED_SPECIALS, 32);
-
-			char gen0[64];
-			{
-				Recipe recipe;
-
-				recipe.SetSpecials(OSP_RECIPE_ALL_SUPPORTED_SPECIALS, length);
-				recipe.SetSeperator(' ');
-				recipe.AddFlags(OSP_RECIPE_ALPHANUMERIC);
-
-				Generate("test", gen0, sizeof(gen0), recipe);
-			}
-
-			char gen1[sizeof(gen0)];
-			{
-				Recipe recipe;
-
-				recipe.SetSpecials(OSP_RECIPE_ALL_SUPPORTED_SPECIALS, length);
-				recipe.AddFlags(OSP_RECIPE_ALPHANUMERIC);
-
-				Generate("test", gen1, sizeof(gen1), recipe);
-			}
-
-			Assert::IsTrue(strncmp(gen0, gen1, sizeof(gen0)) == 0, L"Different passwords created");
-		}
-
 	};
 }

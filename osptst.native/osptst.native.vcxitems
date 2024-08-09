@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{0334636a-8e77-43a9-a8db-e6d6512a42b2}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)Cipher_Test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Cryptography_Test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)OS_Test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)PasswordManager_Test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)Recipe_Test.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)SecureStore_Test.cpp" />
+  </ItemGroup>
+</Project>

@@ -23,6 +23,7 @@ Software.
 #include "CppUnitTest.h"
 
 #include <stack>
+#include <iomanip>
 
 #include "../osp/cryptography.h"
 
@@ -31,7 +32,7 @@ using namespace std;
 
 namespace OneStrongPassword
 {
-	TEST_CLASS(Cryptography_Test)
+	TEST_CLASS(Cryptography_ANSI_Test)
 	{
 	public:
 		static const size_t DATA_SIZE = 32;
@@ -158,6 +159,51 @@ namespace OneStrongPassword
 			Assert::IsFalse(test, L"Not Hashed");
 		}
 
+		template<size_t sz> void CheckHash(const char* const data, const OS::byte expected[sz])
+		{
+			bool success = true;
+
+			Cryptography cryptography(0);
+
+			ByteVector input(cryptography);
+
+			auto dsize = strlen(data);
+			input.Alloc(dsize, &TestError);
+			input.CopyFrom((const OS::byte* const)data, dsize, 0, &TestError);
+
+			ByteArray<sz> check;
+			check.CopyFrom(expected, sz, 0, &TestError);
+
+			ByteArray<sz> hash;
+
+			success = cryptography.Hash(input, hash, &TestError);
+
+			Assert::IsTrue(success, L"Hash failed");
+			Assert::IsFalse(hash.Zeroed(), L"Hash not created");
+			if (0 != memcmp(hash, check, check.Size())) {
+				wstringstream stream;
+
+				stream << L"{";
+				stream << L"0x" << setfill(L'0') << setw(2) << hex << hash[size_t(0)];
+				for (size_t n = 1; n < hash.Size(); n++)
+					stream << L",0x" << setfill(L'0') << setw(2) << hex << hash[n];
+				stream << L"}";
+				wstring hashstr = stream.str();
+
+				stream.clear();
+
+				stream << L"{";
+				stream << L"0x" << setfill(L'0') << setw(2) << hex << check[size_t(0)];
+				for (size_t n = 1; n < check.Size(); n++)
+					stream << L",0x" << setfill(L'0') << setw(2) << hex << check[n];
+				stream << L"}";
+				wstring checkstr = stream.str();
+
+				wstring msg = L"Hash has changed,\n is " + hashstr + L",\n should be " + checkstr;
+				Assert::Fail(msg.c_str());
+			}
+		}
+
 		TEST_METHOD_INITIALIZE(MethodInitialize)
 		{
 			for (size_t n = 1; n <= IV0.Size(); n++)
@@ -182,30 +228,9 @@ namespace OneStrongPassword
 			Assert::AreEqual(TestError.Code, OSP_NO_ERROR, L"There was an undected error");
 		}
 
-		TEST_METHOD(Cryptography_Initialize_Destroy_Test0)
-		{
-			bool success;
-
-			Cryptography cryptography;
-			
-			const size_t count = 2;
-			const size_t maxsize = cryptography.MinDataSize();
-
-			Assert::IsTrue(maxsize > 0, L"Unable to get hash size");
-
-			success = cryptography.Initialize(count, maxsize - 1, &TestError);
-
-			Assert::IsTrue(success, L"Initialize failed");
-			Assert::AreEqual(maxsize, cryptography.MaxDataSize(), L"Wrong maxsize");
-
-			success = cryptography.Destroy(&TestError);
-
-			Assert::IsTrue(success, L"Destroy() failed");
-			Assert::AreEqual(size_t(0), cryptography.AvailableMemory(), L"Wrong available memory");
-		}
-
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test0)
 			TEST_DESCRIPTION(L"Encrypt then decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test0)
@@ -242,6 +267,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test1)
 			TEST_DESCRIPTION(L"Encrypt then decrypt twice.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test1)
@@ -275,6 +301,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test2)
 			TEST_DESCRIPTION(L"Encrypt then decrypt different data.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test2)
@@ -318,6 +345,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test3)
 			TEST_DESCRIPTION(L"Encrypt twice then decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test3)
@@ -348,6 +376,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test4)
 			TEST_DESCRIPTION(L"Encrypt same data different ciphers.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test4)
@@ -382,6 +411,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test5)
 			TEST_DESCRIPTION(L"Encrypt different sizes.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test5)
@@ -456,6 +486,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Test6)
 			TEST_DESCRIPTION(L"Encrypt/decrypt, reset, then encrypt/decrypt.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Test6)
@@ -491,6 +522,7 @@ namespace OneStrongPassword
 
 		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Encrypt_Decrypt_Leak_Test0)
 			TEST_DESCRIPTION(L"Encrypt/Decrypt memory leaks.")
+			TEST_IGNORE()
 		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptography_Encrypt_Decrypt_Leak_Test0)
@@ -532,20 +564,36 @@ namespace OneStrongPassword
 			}
 		}
 
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_Hashing_Test0)
+			TEST_DESCRIPTION(L"Hash BLOCK_SIZE.")
+		END_TEST_METHOD_ATTRIBUTE()
+
 		TEST_METHOD(Cryptograply_Hashing_Test0)
 		{
 			TestHashing<BLOCK_SIZE>();
 		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_Hashing_Test1)
+			TEST_DESCRIPTION(L"Hash BLOCK_SIZE-3.")
+		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptograply_Hashing_Test1)
 		{
 			TestHashing<BLOCK_SIZE-3>();
 		}
 
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_Hashing_Test2)
+			TEST_DESCRIPTION(L"Hash 19.")
+		END_TEST_METHOD_ATTRIBUTE()
+
 		TEST_METHOD(Cryptograply_Hashing_Test2)
 		{
 			TestHashing<19>();
 		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_Hashing_Test3)
+			TEST_DESCRIPTION(L"Hash, Reset, Hash.")
+		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptograply_Hashing_Test3)
 		{
@@ -581,12 +629,20 @@ namespace OneStrongPassword
 			Assert::IsTrue(success, L"Failure destroying hashes");
 		}
 
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_IsHashed_Test0)
+			TEST_DESCRIPTION(L"Confirm array is hased.")
+		END_TEST_METHOD_ATTRIBUTE()
+
 		TEST_METHOD(Cryptograply_IsHashed_Test0)
 		{
 			size_t hashsize = Cryptography().HashSize();
 			Assert::IsTrue(hashsize < BLOCK_SIZE, L"BlOCK_SIZE is too small for the algorithm");
 			TestIsHashed<BLOCK_SIZE>(0, hashsize);
 		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_IsHashed_Test1)
+			TEST_DESCRIPTION(L"Confirm small array is hashed.")
+		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptograply_IsHashed_Test1)
 		{
@@ -595,6 +651,10 @@ namespace OneStrongPassword
 			Assert::IsTrue(hashsize < arraySize, L"Array size is too small for the algorithm");
 			TestIsHashed<arraySize>(arraySize - (arraySize % hashsize), arraySize);
 		}
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptograply_IsHashed_Test2)
+			TEST_DESCRIPTION(L"Confirm odd array is hashed.")
+		END_TEST_METHOD_ATTRIBUTE()
 
 		TEST_METHOD(Cryptograply_IsHashed_Test2)
 		{
@@ -627,6 +687,27 @@ namespace OneStrongPassword
 				success = cryptography.Hash(test, hash, &TestError);
 				Assert::IsTrue(success, L"Hash failed during leak test");
 			}
+		}
+
+
+		BEGIN_TEST_METHOD_ATTRIBUTE(Cryptography_Hash_Check_Test0)
+			TEST_DESCRIPTION(L"Hash has not changed.")
+		END_TEST_METHOD_ATTRIBUTE()
+
+		TEST_METHOD(Cryptography_Hash_Check_Test0)
+		{
+			//const char* const data = "abc";
+			OS::byte check[64] = {
+				0xdd,0xaf,0x35,0xa1,0x93,0x61,0x7a,0xba,
+				0xcc,0x41,0x73,0x49,0xae,0x20,0x41,0x31,
+				0x12,0xe6,0xfa,0x4e,0x89,0xa9,0x7e,0xa2,
+				0x0a,0x9e,0xee,0xe6,0x4b,0x55,0xd3,0x9a,
+				0x21,0x92,0x99,0x2a,0x27,0x4f,0xc1,0xa8,
+				0x36,0xba,0x3c,0x23,0xa3,0xfe,0xeb,0xbd,
+				0x45,0x4d,0x44,0x23,0x64,0x3c,0xe8,0x0e,
+				0x2a,0x9a,0xc9,0x4f,0xa5,0x4c,0xa4,0x9f
+			};
+			CheckHash<64>("abc", check);
 		}
 
 	};

@@ -90,7 +90,9 @@ CLEAR_OSPError(error)
 #define OSP_ERROR_STRONG_PASSWORD_ENTRY_NOT_STARTED      (uint32_t(0x0F))
 #define OSP_ERROR_STRONG_PASSWORD_ENTRY_FULL             (uint32_t(0x10))
 #define OSP_ERROR_UNABLE_TO_MEET_PASSWORD_REQUIREMENTS   (uint32_t(0x11))
-#define OSP_ERROR_TIMEOUT                                (uint32_t(0x12))
+#define OSP_ERROR_PASSWORD_EXCEEDS_SUPPORTED_LENGTH      (uint32_t(0x12))
+#define OSP_ERROR_TIMEOUT                                (uint32_t(0x13))
+#define OSP_ERROR_NOT_SUPPORTED                          (uint32_t(0x14))
 
 typedef struct OSPCipher {
 	void* Handle;

@@ -101,7 +101,7 @@ bool OS::SetOSPError(OSPError* ospError, OSPErrorType type, uint32_t error)
 OS::byte* OS::Zero(byte* const data, size_t size)
 {
 	if (data && size > 0)
-		return (byte*)SecureZeroMemory(data, size);
+		return static_cast<byte*>(SecureZeroMemory(data, size));
 	return data;
 }
 
@@ -172,7 +172,7 @@ bool OS::CopyToClipboard(char* const data, size_t size, OSPError* error)
 			success = checkError(pcopy = GlobalLock(hglob), error);
 			if (pcopy)
 			{
-				strcpy_s((char*)pcopy, size + sizeof(char), data);
+				strcpy_s(static_cast<char*>(pcopy), size + sizeof(char), data);
 				success = checkError(NULL != ::SetClipboardData(CF_TEXT, hglob), error);
 				success = checkError(GlobalUnlock(hglob), error) && success;
 			}
@@ -184,7 +184,7 @@ bool OS::CopyToClipboard(char* const data, size_t size, OSPError* error)
 		GlobalFree(hglob);
 
 	if (success)
-		Zero((byte*)data, size);
+		Zero(reinterpret_cast<byte* const>(data), size);
 
 	return success;
 }
@@ -289,7 +289,7 @@ OS::byte* OS::Alloc(size_t size, OSPError* error)
 		assert(data);
 		if (data)
 			_memory += HeapSize(heap, 0, data);
-		return (byte*)data;
+		return static_cast<byte*>(data);
 	}
 	
 	if (!heap)

@@ -1,5 +1,5 @@
 /*
-One Strong Password Generator Windows Unit Tests
+One Strong Password
 
 Copyright(c) Robert Richard Flores. (MIT License)
 
@@ -25,40 +25,62 @@ Software.
 #include <stack>
 
 #include "../osp/cipher.h"
+#include "../osp/cryptography.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace std;
 
 namespace OneStrongPassword
 {
-	TEST_CLASS(ByteVector_Test)
+
+	TEST_CLASS(Cipher_Test)
 	{
 	public:
 		static const size_t DATA_SIZE = 32;
+		static const size_t BLOCK_SIZE = 512;
+
+		OSPError TestError;
 
 		ByteArray<16> IV;
 
 		ByteArray<DATA_SIZE> TestData;
 
-		std::stack<Cryptography::byte*> ciphercleanup;
+		Cryptography cryptography;
+
+		stack<void*> ciphercleanup;
 
 		void Setup(Cipher& cipher)
 		{
-			bool success = cipher.Prepare();
+			bool success = cipher.Prepare(&TestError);
 			if (success)
 			{
-				cipher.Key = new Cryptography::byte[cipher.Size];
-				ciphercleanup.push((byte*)cipher.Key);
-				success = cipher.Complete();
+				ciphercleanup.push(cipher.Key() = new Cipher::byte[cipher.Size()]);
+				success = cipher.Complete(&TestError);
 			}
 			Assert::IsTrue(success, L"Creating a cipher failed, see Cipher_Test0");
+		}
+
+		void Setup(Cipher& cipher, const ByteVector& secret)
+		{
+			bool success = cipher.Prepare(secret, &TestError);
+			if (success)
+			{
+				ciphercleanup.push(cipher.Key() = new Cipher::byte[cipher.Size()]);
+				success = cipher.Complete(&TestError);
+			}
+			Assert::IsTrue(success, L"Creating a cipher failed, see Cipher_Test1");
 		}
 
 		TEST_METHOD_INITIALIZE(MethodInitialize)
 		{
 			for (size_t n = 1; n <= IV.Size(); n++)
-				IV[n - 1] = (Cryptography::byte)n;
+				IV[n - 1] = (Cipher::byte)n;
+
 			for (size_t n = 1; n <= TestData.Size(); n++)
 				TestData[n - 1] = (Cipher::byte)n;
+
+			bool success = cryptography.Reset(10, BLOCK_SIZE, &TestError);
+			Assert::IsTrue(success, L"OS reset failed");
 		}
 
 		TEST_METHOD_CLEANUP(MethodCleanup)
@@ -68,42 +90,12 @@ namespace OneStrongPassword
 				delete[] ciphercleanup.top();
 				ciphercleanup.pop();
 			}
+
+			bool success = cryptography.Destroy(&TestError);
+			Assert::IsTrue(success, L"OS destroy failed");
+			Assert::IsTrue(EXPOSED(0), L"Something is exposed");
+			Assert::AreEqual(TestError.Code, OSP_NO_ERROR, L"There was an undected error");
 		}
-
-		BEGIN_TEST_METHOD_ATTRIBUTE(ByteArray_CopyFrom_Test0)
-			TEST_DESCRIPTION(L"Vector copy from Vector.")
-		END_TEST_METHOD_ATTRIBUTE()
-
-		TEST_METHOD(ByteArray_CopyFrom_Test0)
-		{
-			ByteArray<DATA_SIZE> data;
-			data.CopyFrom(TestData);
-
-			Assert::IsTrue(memcmp(TestData, data, TestData.Size()) == 0, L"Test data not copied");
-		}
-
-		BEGIN_TEST_METHOD_ATTRIBUTE(ByteArray_CopyFrom_Test1)
-			TEST_DESCRIPTION(L"Vector copy from Vector.")
-		END_TEST_METHOD_ATTRIBUTE()
-
-		TEST_METHOD(ByteArray_CopyFrom_Test1)
-		{
-			bool success;
-
-			Cryptography cryptography(0);
-
-			Cipher cipher(cryptography);
-			Setup(cipher);
-
-			ByteArray<sizeof(TestData)> encrypted;
-			{
-				ByteArray<sizeof(TestData)> data;
-				data.CopyFrom(TestData);
-				success = cryptography.Encrypt(cipher, IV, data, encrypted);
-				Assert::IsTrue(success, L"Encrypt failed");
-				Assert::IsTrue(data.Zeroed(), L"Data not cleared");
-			}
-		}
-
 	};
+
 }
