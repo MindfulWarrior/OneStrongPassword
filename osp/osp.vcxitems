@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{27fea6a7-af9e-4c80-84a7-9f1bf44e36b5}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)bytevector.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)cipher.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)osp.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)passwordmanager.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)recipe.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)securestore.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)strongpassword.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)bytevector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)cipher.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)cryptography.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)hashvector.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)icryptography.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)os.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)osp.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)password.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)passwordmanager.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)recipe.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)securestore.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)strongpassword.h" />
+  </ItemGroup>
+</Project>
